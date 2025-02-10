@@ -7,14 +7,18 @@ app = Flask(__name__)
 CORS(app)
 
 def is_prime(num):
-    if num < 2:
+    if num <= 1 or num % 1 != 0:
         return False
+    num = int(num)
     for i in range(2, int(math.sqrt(num)) + 1):
         if num % i == 0:
             return False
     return True
 
 def is_armstrong(num):
+    if num % 1 != 0:  # Only whole numbers can be Armstrong numbers
+        return False
+    num = abs(int(num))
     digits = [int(digit) for digit in str(num)]
     power = len(digits)
     return sum(digit ** power for digit in digits) == num
@@ -27,16 +31,17 @@ def get_fun_fact(num):
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
     number = request.args.get('number')
+    
+    try:
+        number = float(number)
+    except (ValueError, TypeError):
+        return jsonify({"number": number, "error": "true"}), 400
 
-    if not number or not number.isdigit():
-        return jsonify({"number": number, "error": True}), 400
-
-    number = int(number)
     armstrong = is_armstrong(number)
     prime = is_prime(number)
     even = number % 2 == 0
-    digit_sum = sum(map(int, str(number)))
-    fun_fact = get_fun_fact(number)
+    digit_sum = sum(map(int, str(abs(int(number)))))
+    fun_fact = get_fun_fact(int(number))
 
     properties = []
     if armstrong:
